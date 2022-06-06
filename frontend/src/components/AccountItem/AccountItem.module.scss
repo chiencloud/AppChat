@@ -1,0 +1,62 @@
+
+.messenger{
+    padding-left: 12px;
+    padding-right: 16px;
+    
+    &:hover{
+        background-color: #f8f8f8;
+    }
+
+    a{
+        cursor: pointer;
+        margin-bottom: 10px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        display:flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 480px;
+        box-sizing: border-box;
+        
+
+        .messengerLeft{
+            display: flex;
+
+            .avatar{
+                margin-right: 15px;
+                height: 42px;
+                width: 42px;
+                border-radius: 500px;
+                border: 1px solid #E5E5E5;
+                overflow: hidden;
+        
+                img{
+                    width: 100%;
+                }
+            }
+    
+            h3{
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+    
+            p{
+                font-size: 1.4rem;
+                color: rgb(172, 172, 172);
+            }
+        }
+
+        .blue{
+            font-weight: 500;
+            font-size: 1.5rem;
+            color: var(--primary-color)
+        }
+
+        .gray{
+            font-weight: 500;
+            font-size: 1.5rem;
+            color: var(--text-color)
+        }
+        
+    }
+}

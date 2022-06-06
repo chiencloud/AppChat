@@ -1,0 +1,201 @@
+.messMain {
+    position: relative;
+
+    &:hover .customMess {
+        visibility: visible;
+    }
+}
+
+.messenger {
+    padding: 8px 18px !important;
+    color: rgb(80, 80, 80);
+    cursor: pointer;
+    padding: px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+
+    &:hover {
+        background-color: #f6f6f6;
+    }
+
+    .messengerLeft {
+        display: flex;
+
+        .avatar {
+            margin-right: 15px;
+            height: 52px;
+            width: 52px;
+            border-radius: 500px;
+            border: 1px solid #e5e5e5;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+            }
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        p {
+            font-size: 1.4rem;
+            color: rgb(172, 172, 172);
+
+            span{
+                color: rgb(172, 172, 172) !important;
+                font-size: 1.3rem;
+                font-weight: 400;
+            }
+        }
+    }
+
+    .blue {
+        font-weight: 500;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .gray {
+        font-weight: 500;
+        font-size: 1.5rem;
+        color: var(--text-color);
+    }
+}
+
+.messengerSaw {
+    position: relative;
+
+    .avatar{
+        border: 2px solid var(--primary-color) !important;
+    }
+    .messengerLeft {
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-black);
+        }
+
+        p {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+    }
+
+    .alert {
+        position: absolute;
+        background-color: var(--primary-color);
+        height: 9px;
+        width: 9px;
+        border-radius: 100px;
+        right: 20px;
+    }
+}
+
+.messChose {
+    background-color: #e7effc !important;
+
+    .showBellSlashSaw{
+        background-color: #e7effc !important;
+    }
+
+    .showBellSlash{
+        background-color: #e7effc !important;
+    }
+}
+
+.messenger,
+.messengerSaw {
+    position: relative;
+
+    .showBellSlash{
+        z-index: 15;
+        background-color: #fff;
+        svg{
+            color: rgb(189, 189, 189) !important;
+            font-size: 1.6rem;
+        }
+    }
+
+    .showBellSlashSaw{
+        svg{
+            color: var(--primary-color) !important;
+        }
+    }
+}
+
+.custom {
+    padding: 2px 15px 5px;
+    width: 300px;
+    color: rgb(74, 74, 74);
+    font-size: 1.5rem;
+    font-weight:600;
+
+    svg {
+        margin-right: 20px;
+        font-size: 1.6rem;
+        width: 20px;
+        // color: rgb(88, 88, 88);
+    }
+
+    .notification,
+    .chatCall {
+        padding: 10px 0;
+        border-bottom: 1px solid rgb(185, 185, 185);
+    }
+
+    .deleteBlock {
+        padding: 10px 0;
+    }
+
+    div {
+        padding: 4px 0;
+    }
+
+    .notification,
+    .chatCall,
+    .deleteBlock {
+        div {
+            border-radius: 5px;
+            padding: 5px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #f6f6f6;
+            }
+        }
+    }
+}
+
+.customMess {
+    height: 35px;
+    width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-white);
+    border-radius: 100px;
+    border: 1px solid rgb(208, 208, 208);
+    box-shadow: 0 0 5px rgb(216, 216, 216);
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    z-index: 100;
+    visibility: hidden;
+    cursor: pointer;
+    svg {
+        font-size: 1.9rem;
+        color: rgb(120, 120, 120);
+    }
+
+    &:hover {
+        background-color: rgb(244, 244, 244);
+    }
+}
