@@ -1,0 +1,36 @@
+.homeRightDefault{
+    padding: 40px 50px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+
+
+    h3{
+        font-size: 2.6rem;
+        font-weight: 400;
+        margin-bottom: 20px;
+        color: var(--color-black)
+    }
+
+    p{
+        margin-bottom: 60px;
+    }
+
+    .slider{
+        width: 700px;
+
+        .imgSlider{
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        img{
+            width: 80%;
+        }
+    }
+
+
+}

@@ -4,9 +4,7 @@ import 'tippy.js/dist/tippy.css';
 
 import styles from './Home.module.scss';
 import { ProviderMain } from '~/ContentProvider';
-import { HomeLeft } from './HomeLeft';
-import { HomeRightDefault } from './HomeRightDefault';
-import { HomeRight } from './HomeRight';
+import { HomeLeft, HomeRightDefault,HomeRight } from '~/components/Layouts/Home';
 
 const cx = classNames.bind(styles);
 
@@ -130,6 +128,7 @@ function Home() {
         <div className={cx('home')}>
             <HomeLeft sendHandleLeft={sendHandleLeft} />
             {messageContent ? <HomeRight sendHandleRight={sendHandleRight} /> : <HomeRightDefault />}
+            {/* <HomeRight sendHandleRight={sendHandleRight} /> */}
         </div>
     );
 }

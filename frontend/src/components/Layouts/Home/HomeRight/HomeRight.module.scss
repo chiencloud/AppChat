@@ -1,0 +1,124 @@
+.homeRight {
+    flex: 1;
+
+    .accountMess {
+        padding: 0 20px;
+        height: 72px;
+        border-bottom: 1px solid #e5e5e5;
+        box-sizing: border-box;
+
+        .accountMessLeft {
+            height: 100%;
+            display: flex;
+            align-items: center;
+
+            .imgChat {
+                margin-right: 15px;
+                height: 48px;
+                width: 48px;
+                border: 1px solid #e5e5e5;
+                border-radius: 500px;
+                overflow: hidden;
+
+                img {
+                    width: 100%;
+                }
+            }
+
+            .accountMessInfo {
+                h2 {
+                    font-size: 1.8rem;
+                    color: var(--color-black);
+                    font-weight: 600;
+                }
+                p {
+                    font-size: 1.3rem;
+                }
+            }
+        }
+    }
+
+    .messContent {
+        // overflow: hidden;
+        height: calc(100% - 72px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+
+        .messContentMain {
+            padding: 0 5px 0 20px;
+            width: 100%;
+            height: calc(100% - 65px);
+            overflow: auto;
+            
+        }
+
+        .sendMessage {
+            display: flex;
+            align-items: center;
+            padding: 0 35px;
+
+            .chooseFile {
+                padding-right: 15px;
+                display: flex;
+
+                svg {
+                    padding-right: 20px;
+                    font-size: 1.8rem;
+                    color: var(--primary-color);
+                }
+            }
+
+            .send {
+                height: 65px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                box-sizing: border-box;
+                justify-content: space-between;
+
+                .inputSend {
+                    padding: 9px 15px;
+                    width: 95%;
+
+                    position: relative;
+                    background-color: #f8f8f8;
+                    border-radius: 500px;
+                    display: flex;
+                    align-items: center;
+
+                    input {
+                        flex: 1;
+                        background-color: transparent;
+                        font-size: 1.4rem;
+                    }
+
+                    span {
+                        cursor: pointer;
+                        svg {
+                            font-size: 2rem;
+                            color: var(--primary-color);
+                        }
+                    }
+
+                    .emoji {
+                        position: absolute;
+                        bottom: calc(100% + 10px);
+                        right: 0;
+                    }
+                }
+
+                button {
+                    background-color: transparent;
+                    cursor: pointer;
+                    svg {
+                        transform: rotate(17deg);
+                        font-size: 1.5em;
+                        color: var(--primary-color);
+                    }
+                }
+            }
+        }
+    }
+}

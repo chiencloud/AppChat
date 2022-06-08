@@ -61,6 +61,16 @@
             text-decoration: underline;
         }
 
+        .passFail{
+            color: red;
+            // visibility: hidden;
+            
+            p{
+                text-align: right;
+                font-weight: 500;
+            }
+        }
+
         .forgotPass {
             text-align: right;
             margin-bottom: 20px;
