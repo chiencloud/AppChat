@@ -4,7 +4,8 @@ var connect = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'appchat',
+    database: 'appchat2',
+    charset : 'utf8mb4'
 });
 
 function query(queryCommand, queryFunction) {

@@ -1,17 +1,21 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import axios from 'axios';
+import Cookies from 'universal-cookie';
+
 import styles from './Login.module.scss';
+import { checkCookieLogin } from '~/global';
 
 const cx = classNames.bind(styles);
+const cookies = new Cookies();
 
 function Login() {
     const [noUserName, setNoUserName] = useState(false);
     const [noPass, setNoPass] = useState(false);
     const [noPassFail, setNoPassFail] = useState(false);
-    const navigate = useNavigate();
     const userName = useRef();
+    const navigate = useNavigate();
     const pass = useRef();
 
     const handleLogin = () => {
@@ -25,14 +29,15 @@ function Login() {
                 },
             })
                 .then((respon) => {
-                    if (respon.token) {
-                        document.cookie = `token=${respon.token}`;
+                    if (respon.data.token) {
+                        cookies.set('token', respon.data.token, { path: '/' });
+                        cookies.set('userId', respon.data.userId, { path: '/' });
                         navigate('/', { replace: true });
                     }
-                    if (respon.err) {
+                    if (respon.data.err) {
                         alert('Lỗi cơ sở dữ liệu');
                     }
-                    if (respon.fail) {
+                    if (respon.data.fail) {
                         setNoPassFail(true);
                         setNoUserName(false);
                         setNoPass(false);
@@ -45,6 +50,15 @@ function Login() {
             setNoPass(false);
         }
     };
+
+    useEffect(() => {
+        checkCookieLogin().then( res => {
+            if(res.data.login)
+                navigate('/')
+        }).catch((e) => {
+
+        });
+    }, []);
 
     return (
         <div className={cx('login')}>

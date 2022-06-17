@@ -1,22 +1,23 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import classNames from 'classnames/bind';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-    faFaceSmile,
-    faImages,
-    faMicrophone,
-    faPaperPlane,
-} from '@fortawesome/free-solid-svg-icons';
+import { faFaceSmile, faImages, faMicrophone, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import Picker from 'emoji-picker-react';
 import Tippy from '@tippyjs/react/headless';
+import Cookies from 'universal-cookie';
+import axios from 'axios';
 
 import styles from './HomeRight.module.scss';
 import Message from '~/components/Message';
+import { SocketContext } from '~/components/Layouts/DefaultLayouts';
 
 const cx = classNames.bind(styles);
 
 function HomeRight({ sendHandleRight }) {
-    const { messageContent, setMessageContent, me } = sendHandleRight;
+    const { messageContent, setMessageContent, setMesChoose, setMessenger, me } = sendHandleRight;
+    const cookies = new Cookies();
+    const socket = useContext(SocketContext);
+
     const AccountMess = () => {
         return (
             <div className={cx('accountMess')}>
@@ -36,6 +37,7 @@ function HomeRight({ sendHandleRight }) {
     const AccountContent = () => {
         const [emoji, setEmoji] = useState(false);
         const [cursorPosition, setCursorPosition] = useState(0);
+        const messContentMain = useRef();
 
         const inputMess = useRef();
 
@@ -48,43 +50,96 @@ function HomeRight({ sendHandleRight }) {
         };
 
         const handleSendMessage = () => {
-            setMessageContent((messContentPrev) => {
-                return {
-                    ...messContentPrev,
-                    message: [
-                        ...messContentPrev.message,
+            let timeCurrent = new Date();
+            let formatTime =
+                timeCurrent.getUTCFullYear() +
+                '-' +
+                ('00' + (timeCurrent.getMonth() + 1)).slice(-2) +
+                '-' +
+                ('00' + timeCurrent.getDate()).slice(-2) +
+                ' ' +
+                ('00' + timeCurrent.getHours()).slice(-2) +
+                ':' +
+                ('00' + timeCurrent.getMinutes()).slice(-2) +
+                ':' +
+                ('00' + timeCurrent.getSeconds()).slice(-2);
 
-                        // Add new message
-                        {
-                            messageInfoId: 'mess6',
-                            userSend: {
-                                userId: '001',
-                                fullName: 'Trần Đắc Phong',
-                                nickName: 'phongtd',
-                                avatar: 'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                            },
-                            messageContent: inputMess.current.value,
-                            hidden: '',
-                            forward: '',
-                            reply: '',
-                            createAt: '2022-05-30 09:56:16',
-                            saw: '',
-                            delete: '',
-                        },
-                    ],
+            if (inputMess.current.value) {
+                let data = {
+                    roomChatId: sendHandleRight.messageContent.roomChatId,
+                    userId: me.id,
+                    messageContent: inputMess.current.value,
+                    createAt: formatTime,
                 };
-            });
+                socket.emit('sendMess', data);
+                inputMess.current.value = '';
+                inputMess.current.focus();
+            }
         };
 
         useEffect(() => {
             inputMess.current.selectionEnd = cursorPosition;
         }, [cursorPosition]);
 
+        useEffect(() => {
+            socket.on('reviceMess', (reviceMess) => {
+                if (reviceMess) {
+                    axios
+                        .get('http://localhost:4000/api/messages', {
+                            params: {
+                                token: cookies.get('token'),
+                                roomChatId: sendHandleRight.messageContent.roomChatId,
+                            },
+                        })
+                        .then((res) => {
+                            setMessageContent(res.data);
+                            axios.get('http://localhost:4000/api/home', {
+                                params: {
+                                    token: cookies.get('token'),
+                                },
+                            })
+                            .then((resultMessenger) => {
+                                setMessenger(resultMessenger.data);
+                            });
+                        });
+                }
+            });
+
+            socket.on('seenMessage', (seenMessage) => {
+                if (seenMessage) {
+                    axios
+                        .get('http://localhost:4000/api/messages', {
+                            params: {
+                                token: cookies.get('token'),
+                                roomChatId: sendHandleRight.messageContent.roomChatId,
+                            },
+                        })
+                        .then((res) => {
+                            setMessageContent(res.data);
+                        })
+                }
+            });
+
+            
+        }, [socket]);
+
+        useEffect(() => {
+            messContentMain.current.scrollTo(0, 100000000);
+        }, [messageContent]);
+
         return (
             <div className={cx('messContent')}>
-                <div className={cx('messContentMain')}>
+                <div ref={messContentMain} className={cx('messContentMain')}>
                     {messageContent.message.map((messRender, index, messArray) => {
-                        return <Message key={messRender.messageInfoId} messRender={messRender} index={index} messArray={messArray} me={me}/>
+                        return (
+                            <Message
+                                key={messRender.messageInfoId}
+                                messRender={messRender}
+                                index={index}
+                                messArray={messArray}
+                                me={me}
+                            />
+                        );
                     })}
                 </div>
                 <div className={cx('sendMessage')}>
@@ -105,7 +160,7 @@ function HomeRight({ sendHandleRight }) {
                             )}
                         >
                             <div className={cx('inputSend')}>
-                                <input placeholder="Nhập tin nhắn" ref={inputMess} />
+                                <input type="test" placeholder="Nhập tin nhắn" ref={inputMess} />
                                 <span onClick={() => setEmoji(!emoji)}>
                                     <FontAwesomeIcon icon={faFaceSmile} />
                                 </span>
@@ -119,6 +174,14 @@ function HomeRight({ sendHandleRight }) {
             </div>
         );
     };
+
+    useEffect(() => {
+        console.log(12345);
+        socket.on('reloadMessenger', (data) => {
+            console.log(data);
+        });
+    },[socket])
+
     return (
         <div className={cx('homeRight')}>
             <AccountMess />

@@ -29,5 +29,11 @@
         padding-top: 12px;
         overflow-y: scroll;
         flex: 1;
+
+        .searchFriend{
+            padding: 30px;
+            text-align: center;
+            color: var(--primary-color);
+        }
     }
 }

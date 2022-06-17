@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
     faArrowRight,
     faCircleCheck,
@@ -11,14 +11,14 @@ import classNames from 'classnames/bind';
 import Tippy from '@tippyjs/react';
 
 import styles from './Message.module.scss';
+import { PopperWrapper } from '~/components/Popper';
 
 const cx = classNames.bind(styles);
 
 function Message({ messRender, index, messArray, me }) {
-    const hoverMess = useRef();
-    const messVal = useRef();
-    const messActionLeft = useRef();
-    const messActionRight = useRef();
+    const [interactiveSeeMore, setInteractiveSeeMore] = useState(false);
+    const seeMore = useRef();
+    const messAction = useRef();
 
     let showAvatar = true;
     let showNickName = true;
@@ -30,23 +30,19 @@ function Message({ messRender, index, messArray, me }) {
     if (messRender.forward) showForward = true;
 
     useEffect(() => {
-        if (messActionLeft.current) {
-            messActionLeft.current.style.left = messVal.current.offsetWidth + 12 + 'px';
-            messActionLeft.current.style.top =
-                messVal.current.offsetHeight / 2 - messActionLeft.current.offsetHeight / 2 + 'px';
+        if (seeMore.current) {
+            if (interactiveSeeMore) {
+                seeMore.current.style.visibility = 'visible';
+                messAction.current.style.visibility = 'visible';
+            } else {
+                seeMore.current.style.visibility = 'hidden';
+                messAction.current.style.visibility = '';
+            }
         }
-        if (messActionRight.current) {
-            messActionRight.current.style.right = messVal.current.offsetWidth + 12 + 'px';
-            messActionRight.current.style.top =
-                messVal.current.offsetHeight / 2 - messActionRight.current.offsetHeight / 2 + 'px';
-        }
-        return () => {
-            // second;
-        };
-    }, []);
+    }, [interactiveSeeMore]);
 
     // Hanhdle message of member on chat
-    if (messRender.userSend.userId !== me.id) {
+    if (messRender.userSend.userId != me.id) {
         // Check show icon member, nick name, style border-radius of send message
         if (
             index === 0 &&
@@ -60,7 +56,8 @@ function Message({ messRender, index, messArray, me }) {
                 messArray[index - 1].userSend.userId !== messRender.userSend.userId &&
                 messRender.userSend.userId === messArray[index + 1].userSend.userId
             ) {
-                showNickName = false;
+                // showNickName = false;
+                showAvatar = false;
                 styleMess = ['messBorderBottomLeft'];
             }
 
@@ -94,7 +91,7 @@ function Message({ messRender, index, messArray, me }) {
         if (showReply) showNickName = false;
 
         return (
-            <div ref={hoverMess} className={cx('messOfFriend')}>
+            <div className={cx('messOfFriend')}>
                 <div className={cx('messOfFriendAvatar')}>{showAvatar && <img src={messRender.userSend.avatar} />}</div>
                 <div>
                     {showNickName && <p>{messRender.userSend.nickName || messRender.userSend.fullName}</p>}
@@ -117,26 +114,61 @@ function Message({ messRender, index, messArray, me }) {
                         </div>
                     )}
                     <div className={cx('messValue')}>
-                        <span ref={messVal} className={cx(styleMess)}>
-                            {messRender.messageContent}
-                        </span>
-                        <div ref={messActionLeft} className={cx('messAction')}>
+                        <span className={cx(styleMess)}>{messRender.messageContent}</span>
+                        <div ref={messAction} className={cx('messAction')}>
                             <div>
-                                {/* <Tippy 
-                                    visible
-                                    // placement='top-right'
-                                    render={() => {
-                                        return <div>Biểu tượng cảm xúc</div>
-                                    }}
-                                > */}
-                                    <FontAwesomeIcon icon={faFaceSmile} />
-                                {/* </Tippy> */}
+                                <Tippy
+                                    placement="top"
+                                    content={<span className={cx('tooltip1')}>Biểu tượng cảm xúc</span>}
+                                >
+                                    <div className={cx('messInteractive')}>
+                                        <FontAwesomeIcon icon={faFaceSmile} />
+                                    </div>
+                                </Tippy>
                             </div>
                             <div>
-                                <FontAwesomeIcon icon={faReply} />
+                                <Tippy placement="top" content={<span className={cx('tooltip1')}>Trả lời</span>}>
+                                    <div className={cx('messInteractive')}>
+                                        <FontAwesomeIcon icon={faReply} />
+                                    </div>
+                                </Tippy>
                             </div>
                             <div>
-                                <FontAwesomeIcon icon={faEllipsisVertical} />
+                                <Tippy placement="top" content={<span className={cx('tooltip1')}>Xem thêm</span>}>
+                                    <Tippy
+                                        interactive
+                                        visible={interactiveSeeMore}
+                                        onClickOutside={() => {
+                                            setInteractiveSeeMore(false);
+                                        }}
+                                        placement="top"
+                                        render={(arrt) => {
+                                            return (
+                                                <div ref={seeMore} {...arrt}>
+                                                    <PopperWrapper>
+                                                        <div className={cx('seeMore')}>
+                                                            <div>
+                                                                <p>Xóa, gỡ bỏ</p>
+                                                            </div>
+                                                            <div>
+                                                                <p>Chuyển tiếp</p>
+                                                            </div>
+                                                        </div>
+                                                    </PopperWrapper>
+                                                </div>
+                                            );
+                                        }}
+                                    >
+                                        <div
+                                            className={cx('messInteractive')}
+                                            onClick={() => {
+                                                setInteractiveSeeMore(!interactiveSeeMore);
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={faEllipsisVertical} />
+                                        </div>
+                                    </Tippy>
+                                </Tippy>
                             </div>
                         </div>
                     </div>
@@ -184,24 +216,9 @@ function Message({ messRender, index, messArray, me }) {
 
     let avatarSeen = [];
     if (index === messArray.length - 1) {
-        showSeen = messRender.saw.split(' ');
-        if (showSeen.length === 1 && showSeen[0] !== '') {
-            avatarSeen = [
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-            ];
-        }
+        showSeen = messRender.saw;
         if (showSeen.length > 1) {
-            avatarSeen = [
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-            ];
+            avatarSeen = showSeen.filter((e) => e.UserId != me.id).map((e) => e.Avatar);
         }
     }
 
@@ -229,11 +246,11 @@ function Message({ messRender, index, messArray, me }) {
     };
 
     return (
-        <div ref={hoverMess} key={messRender.messageInfoId}>
+        <div key={messRender.messageInfoId}>
             <div className={cx('messOfMe')}>
                 <div className={cx('messOfFriendAvatar')}>
-                    {showSeen[0] === '' && index === messArray.length - 1 && <FontAwesomeIcon icon={faCircleCheck} />}
-                    {showSeen[0] !== '' && showSeen.length === 1 && index === messArray.length - 1 && (
+                    {showSeen.length === 1 && index === messArray.length - 1 && <FontAwesomeIcon icon={faCircleCheck} />}
+                    {showSeen.length === 2 && index === messArray.length - 1 && (
                         <img src={avatarSeen[0]} alt="" />
                     )}
                 </div>
@@ -257,16 +274,67 @@ function Message({ messRender, index, messArray, me }) {
                         </div>
                     )}
                     <div className={cx('messValue')}>
-                        <span ref={messVal} className={cx(styleMess)}>
-                            {messRender.messageContent}
-                        </span>
-                        <div ref={messActionRight} className={cx('messAction')}>
-                            Chien
+                        <div ref={messAction} className={cx('messAction')}>
+                            <div>
+                                <Tippy placement="top" content={<span className={cx('tooltip1')}>Xem thêm</span>}>
+                                    <Tippy
+                                        interactive
+                                        visible={interactiveSeeMore}
+                                        onClickOutside={() => {
+                                            setInteractiveSeeMore(false);
+                                        }}
+                                        placement="top"
+                                        render={(arrt) => {
+                                            return (
+                                                <div ref={seeMore} {...arrt}>
+                                                    <PopperWrapper>
+                                                        <div className={cx('seeMore')}>
+                                                            <div>
+                                                                <p>Xóa, gỡ bỏ</p>
+                                                            </div>
+                                                            <div>
+                                                                <p>Chuyển tiếp</p>
+                                                            </div>
+                                                        </div>
+                                                    </PopperWrapper>
+                                                </div>
+                                            );
+                                        }}
+                                    >
+                                        <div
+                                            className={cx('messInteractive')}
+                                            onClick={() => {
+                                                setInteractiveSeeMore(!interactiveSeeMore);
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={faEllipsisVertical} />
+                                        </div>
+                                    </Tippy>
+                                </Tippy>
+                            </div>
+                            <div>
+                                <Tippy placement="top" content={<span className={cx('tooltip1')}>Trả lời</span>}>
+                                    <div className={cx('messInteractive')}>
+                                        <FontAwesomeIcon icon={faReply} />
+                                    </div>
+                                </Tippy>
+                            </div>
+                            <div>
+                                <Tippy
+                                    placement="top"
+                                    content={<span className={cx('tooltip1')}>Biểu tượng cảm xúc</span>}
+                                >
+                                    <div className={cx('messInteractive')}>
+                                        <FontAwesomeIcon icon={faFaceSmile} />
+                                    </div>
+                                </Tippy>
+                            </div>
                         </div>
+                        <span className={cx(styleMess)}>{messRender.messageContent}</span>
                     </div>
                 </div>
             </div>
-            {showSeen.length > 1 && <UserSeenMessage />}
+            {showSeen.length > 2 && <UserSeenMessage />}
         </div>
     );
 }

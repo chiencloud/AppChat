@@ -1,3 +1,4 @@
 import countTime from "./countTime";
+import checkCookieLogin from "./checkCookieLogin";
 
-export {countTime}
+export {countTime, checkCookieLogin}

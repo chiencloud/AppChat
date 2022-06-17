@@ -15,20 +15,25 @@ import {
     faVideoCamera,
 } from '@fortawesome/free-solid-svg-icons';
 import Tippy from '@tippyjs/react';
+import axios from 'axios';
+import Cookies from 'universal-cookie';
+
 import { PopperWrapper } from '~/components/Popper';
 import { countTime } from '~/global';
+import {SocketContext} from '~/components/Layouts/DefaultLayouts'
+import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function Messenger({ infor, handleOnclick }) {
-    const user = useContext(ProviderMain);
+    const me = useContext(ProviderMain);
     const [custom, setCustom] = useState(false);
     const [countTimeSend, setCountTimeSend] = useState(countTime(infor.messageInfo.createAt));
     const { messChoose, setMesChoose, setMessageContent } = handleOnclick;
+    const cookies = new Cookies()
+    const socket = useContext(SocketContext);
 
-    const sawMessage = infor.messageInfo.saw.split(' ');
-    const checkSawMessage = sawMessage.some((e) => e === user.id);
-
+    const checkSawMessage = infor.messageInfo.saw
     const tippy = useRef();
 
     const UserProfile = () => {
@@ -66,6 +71,26 @@ function Messenger({ infor, handleOnclick }) {
             </div>
         );
     };
+    
+
+    const showMessContent = () => {
+        axios.get('http://localhost:4000/api/messages',{
+            params: {
+                token: cookies.get('token'),
+                roomChatId: infor.roomChatId
+            }
+        }).then( res => {
+            setMessageContent(res.data)
+        })
+        setMesChoose(infor.roomChatId);
+        
+        socket.emit('joinRoomChat',{
+            roomId: infor.roomChatId,
+            messageInfoId: infor.messageInfo.messageInfoId,
+            user: me.id,
+            saw: infor.messageInfo.saw
+        })
+    };
 
     useEffect(() => {
         if (tippy.current) {
@@ -88,171 +113,37 @@ function Messenger({ infor, handleOnclick }) {
             clearInterval(handleCountTime);
         };
     }, []);
-
-    // console.log(countTimeSend);
-
     return (
         <div className={cx('messMain')}>
             <div
                 className={cx(
                     'messenger',
-                    checkSawMessage && 'messengerSaw',
-                    messChoose === infor.userId && 'messChose',
+                    !checkSawMessage && 'messengerSaw',
+                    messChoose === infor.roomChatId && 'messChose',
                 )}
-                onClick={() => {
-                    setMesChoose(infor.userId);
-                    setMessageContent({
-                        userId: '1',
-                        roomChatId: 'room1',
-                        roomChatName: 'Nguyễn Duy Chiến',
-                        imageBackground:
-                            'https://res.cloudinary.com/dseuvenfm/image/upload/v1649743106/Cloud/ImageProduct/aBT5A8965_gyurga.jpg',
-                        emoji: '',
-                        topic: {
-                            topicId: 'topic1',
-                            topicName: 'Xanh',
-                        },
-                        notification: '15',
-                        nickName: 'chienCloud',
-                        fullName: 'Nguyễn Duy Chiến',
-
-                        onChatRoom: true,
-                        member: 2,
-                        message: [
-                            {
-                                messageInfoId: 'mess0',
-                                userSend: {
-                                    userId: '002',
-                                    fullName: 'Trần Đắc Phong',
-                                    nickName: 'phongtd',
-                                    avatar: 'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                                },
-                                messageContent: 'Alo Alo',
-                                createAt: '2022-05-30 09:56:16',
-                                hidden: '005 006',
-                                forward: '',
-                                delete: '',
-                                reply: {
-                                    messageInfoId: 'mess1',
-                                    userSendId: '001',
-                                    nickNameSend: 'chiencloud',
-                                    fullNameSend: 'Nguyễn Duy Chiến',
-                                    messageContent: 'Alo Chiến 12345',
-                                },
-                                saw: '002',
-                            },
-                            {
-                                messageInfoId: 'mess3',
-                                userSend: {
-                                    userId: '002',
-                                    fullName: 'Trần Đắc Phong',
-                                    nickName: 'phongtd',
-                                    avatar: 'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                                },
-                                messageContent: '12345',
-                                createAt: '2022-05-30 09:56:16',
-                                hidden: '',
-                                forward: 'mess100',
-                                delete: '',
-                                reply: {},
-                                saw: '',
-                            },
-                            {
-                                messageInfoId: 'mess1',
-                                userSend: {
-                                    userId: '001',
-                                    fullName: 'Trần Đắc Phong',
-                                    nickName: 'phongtd',
-                                    avatar: 'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                                },
-                                messageContent: 'Alo Chiến',
-                                createAt: '2022-05-30 09:56:16',
-                                hidden: '',
-                                forward: '',
-                                delete: '',
-                                reply: {
-                                    messageInfoId: 'mess1',
-                                    userSendId: '001',
-                                    nickNameSend: '',
-                                    fullNameSend: 'Nguyễn Duy Chiến',
-                                    messageContent: 'Gì Hà xinh gái',
-                                },
-                                saw: '',
-                            },
-                            {
-                                messageInfoId: 'mess2',
-                                userSend: {
-                                    userId: '001',
-                                    fullName: 'Trần Đắc Phong',
-                                    nickName: 'phongtd',
-                                    avatar: 'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                                },
-                                messageContent: '12345',
-                                createAt: '2022-05-30 09:56:16',
-                                hidden: '',
-                                forward: '',
-                                delete: '',
-                                reply: {},
-                                saw: '',
-                            },
-                            {
-                                messageInfoId: 'mess4',
-                                userSend: {
-                                    userId: '003',
-                                    fullName: 'Nguyễn Duy Chiến',
-                                    nickName: '',
-                                    avatar: 'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                                },
-                                messageContent:
-                                    'Singapore đất nước với diện tích chỉ tầm 1/5 Hà Nội, đất nước mà nước cũng là một nguồn tài nguyên quý giá. Chính vì vậy tại đất nước này nước thải sau khi đổ xuống cống sẽ được hệ thống lọc nước tiên tiến tái chế để sử dụng làm nước sinh hoạt. Được biết tại quốc đảo này người dân có thể uống nước trực tiếp từ vòi nước này.',
-                                createAt: '2022-05-30 09:56:16',
-                                hidden: '005 006',
-                                forward: '',
-                                delete: '',
-                                reply: {},
-                                saw: '002',
-                            },
-                            // {
-                            //     messageInfoId: 'mess5',
-                            //     userSend: {
-                            //         userId: '001',
-                            //         fullName: 'Trần Đắc Phong',
-                            //         nickName: 'phongtd',
-                            //         avatar: 'https://scontent.fhan5-2.fna.fbcdn.net/v/t39.30808-1/278073227_1533794527018124_1201657733374137874_n.jpg?stp=dst-jpg_p200x200&_nc_cat=104&ccb=1-7&_nc_sid=7206a8&_nc_ohc=hXeHJKVbevkAX8Rmw1S&_nc_ht=scontent.fhan5-2.fna&oh=00_AT_1PXVF7yg07cvbVvsYxUsUPFAyY2UAuh5QEqz_vK6j4A&oe=62A2BBBC',
-                            //     },
-                            //     messageContent: 'Alo 123',
-                            //     createAt: '2022-05-30 09:56:16',
-                            //     hidden: '',
-                            //     forward: '',
-                            //     delete: '',
-                            //     reply: {
-
-                            // },
-                            //     saw: '1',
-                            // },
-                        ],
-                    });
-                }}
+                onClick={showMessContent}
             >
-                <div className={cx('messengerLeft')}>
-                    <div className={cx('avatar')}>
-                        <img src={infor.imageBackground} alt={infor.roomChatName} />
+                <Link to={`/room/${infor.roomChatId}`}>
+                    <div className={cx('messengerLeft')}>
+                        <div className={cx('avatar')}>
+                            <img src={infor.imageBackground} alt={infor.roomChatName} />
+                        </div>
+                        <div className={cx('infor')}>
+                            <h3>{infor.roomChatName}</h3>
+                            <p>
+                                {infor.messageInfo.messageContent.length > 20
+                                    ? infor.messageInfo.messageContent.slice(0, 20) + '...'
+                                    : infor.messageInfo.messageContent}
+                                <span>&ensp;{' · ' + countTimeSend}</span>
+                            </p>
+                        </div>
                     </div>
-                    <div className={cx('infor')}>
-                        <h3>{infor.roomChatName}</h3>
-                        <p>
-                            {infor.messageInfo.messageContent.length > 20
-                                ? infor.messageInfo.messageContent.slice(0, 20) + '...'
-                                : infor.messageInfo.messageContent}
-                            <span>&ensp;{' · ' + countTimeSend}</span>
-                        </p>
+    
+                    <div className={cx('alert')}></div>
+                    <div className={cx('showBellSlash', !checkSawMessage && 'showBellSlashSaw')}>
+                        {infor.notification !== null && <FontAwesomeIcon icon={faBellSlash} /> }
                     </div>
-                </div>
-
-                <div className={cx('alert')}></div>
-                <div className={cx('showBellSlash', checkSawMessage && 'showBellSlashSaw')}>
-                    {infor.notification !== '' ? <FontAwesomeIcon icon={faBellSlash} /> : ''}
-                </div>
+                </Link>
             </div>
             <div>
                 <Tippy
@@ -267,7 +158,7 @@ function Messenger({ infor, handleOnclick }) {
                                 <div className={cx('custom')}>
                                     <div className={cx('notification')}>
                                         {parseInt(infor.member) == 2 && <UserProfile />}
-                                        {infor.notification === '' ? <Bell /> : <BellSlash />}
+                                        {infor.notification === null ? <Bell /> : <BellSlash />}
                                     </div>
                                     <div className={cx('chatCall')}>
                                         <div>
