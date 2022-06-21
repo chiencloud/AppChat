@@ -1,7 +1,6 @@
-import { useContext, useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Messenger.module.scss';
-import { ProviderMain } from '~/ContentProvider';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faBan,
@@ -15,23 +14,18 @@ import {
     faVideoCamera,
 } from '@fortawesome/free-solid-svg-icons';
 import Tippy from '@tippyjs/react';
-import axios from 'axios';
-import Cookies from 'universal-cookie';
+import { useParams } from 'react-router-dom';
 
 import { PopperWrapper } from '~/components/Popper';
 import { countTime } from '~/global';
-import {SocketContext} from '~/components/Layouts/DefaultLayouts'
 import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
-function Messenger({ infor, handleOnclick }) {
-    const me = useContext(ProviderMain);
+function Messenger({ infor }) {
     const [custom, setCustom] = useState(false);
     const [countTimeSend, setCountTimeSend] = useState(countTime(infor.messageInfo.createAt));
-    const { messChoose, setMesChoose, setMessageContent } = handleOnclick;
-    const cookies = new Cookies()
-    const socket = useContext(SocketContext);
+    const {roomChatId} = useParams()
 
     const checkSawMessage = infor.messageInfo.saw
     const tippy = useRef();
@@ -71,26 +65,6 @@ function Messenger({ infor, handleOnclick }) {
             </div>
         );
     };
-    
-
-    const showMessContent = () => {
-        axios.get('http://localhost:4000/api/messages',{
-            params: {
-                token: cookies.get('token'),
-                roomChatId: infor.roomChatId
-            }
-        }).then( res => {
-            setMessageContent(res.data)
-        })
-        setMesChoose(infor.roomChatId);
-        
-        socket.emit('joinRoomChat',{
-            roomId: infor.roomChatId,
-            messageInfoId: infor.messageInfo.messageInfoId,
-            user: me.id,
-            saw: infor.messageInfo.saw
-        })
-    };
 
     useEffect(() => {
         if (tippy.current) {
@@ -113,15 +87,15 @@ function Messenger({ infor, handleOnclick }) {
             clearInterval(handleCountTime);
         };
     }, []);
+    
     return (
         <div className={cx('messMain')}>
             <div
                 className={cx(
                     'messenger',
                     !checkSawMessage && 'messengerSaw',
-                    messChoose === infor.roomChatId && 'messChose',
+                    roomChatId == infor.roomChatId && 'messChose',
                 )}
-                onClick={showMessContent}
             >
                 <Link to={`/room/${infor.roomChatId}`}>
                     <div className={cx('messengerLeft')}>

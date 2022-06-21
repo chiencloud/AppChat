@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from 'react';
+import { useState, useRef, useEffect, useContext, useLayoutEffect } from 'react';
 import classNames from 'classnames/bind';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFaceSmile, faImages, faMicrophone, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
@@ -6,17 +6,36 @@ import Picker from 'emoji-picker-react';
 import Tippy from '@tippyjs/react/headless';
 import Cookies from 'universal-cookie';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 import styles from './HomeRight.module.scss';
 import Message from '~/components/Message';
+import { ProviderMain } from '~/ContentProvider';
 import { SocketContext } from '~/components/Layouts/DefaultLayouts';
 
 const cx = classNames.bind(styles);
 
-function HomeRight({ sendHandleRight }) {
-    const { messageContent, setMessageContent, setMesChoose, setMessenger, me } = sendHandleRight;
+function HomeRight() {
+    const { roomChatId } = useParams();
     const cookies = new Cookies();
     const socket = useContext(SocketContext);
+    const me = useContext(ProviderMain);
+    const [infor, setInfor] = useState(null);
+    const [checkInfor, setCheckInfor] = useState(true);
+    const [messageContent, setMessageContent] = useState({
+        roomChatId: '',
+        roomChatName: '',
+        imageBackground: '',
+        emoji: '',
+        topicId: '',
+        topicName: '',
+        notification: '',
+        nickName: '',
+        fullName: '',
+        onChatRoom: true,
+        member: '',
+        message: [],
+    });
 
     const AccountMess = () => {
         return (
@@ -50,23 +69,22 @@ function HomeRight({ sendHandleRight }) {
         };
 
         const handleSendMessage = () => {
-            let timeCurrent = new Date();
-            let formatTime =
-                timeCurrent.getUTCFullYear() +
-                '-' +
-                ('00' + (timeCurrent.getMonth() + 1)).slice(-2) +
-                '-' +
-                ('00' + timeCurrent.getDate()).slice(-2) +
-                ' ' +
-                ('00' + timeCurrent.getHours()).slice(-2) +
-                ':' +
-                ('00' + timeCurrent.getMinutes()).slice(-2) +
-                ':' +
-                ('00' + timeCurrent.getSeconds()).slice(-2);
-
-            if (inputMess.current.value) {
+            if (inputMess.current.value.trim()) {
+                let timeCurrent = new Date();
+                let formatTime =
+                    timeCurrent.getUTCFullYear() +
+                    '-' +
+                    ('00' + (timeCurrent.getMonth() + 1)).slice(-2) +
+                    '-' +
+                    ('00' + timeCurrent.getDate()).slice(-2) +
+                    ' ' +
+                    ('00' + timeCurrent.getHours()).slice(-2) +
+                    ':' +
+                    ('00' + timeCurrent.getMinutes()).slice(-2) +
+                    ':' +
+                    ('00' + timeCurrent.getSeconds()).slice(-2);
                 let data = {
-                    roomChatId: sendHandleRight.messageContent.roomChatId,
+                    roomChatId: roomChatId,
                     userId: me.id,
                     messageContent: inputMess.current.value,
                     createAt: formatTime,
@@ -88,19 +106,21 @@ function HomeRight({ sendHandleRight }) {
                         .get('http://localhost:4000/api/messages', {
                             params: {
                                 token: cookies.get('token'),
-                                roomChatId: sendHandleRight.messageContent.roomChatId,
+                                roomChatId: roomChatId,
                             },
                         })
                         .then((res) => {
                             setMessageContent(res.data);
-                            axios.get('http://localhost:4000/api/home', {
-                                params: {
-                                    token: cookies.get('token'),
-                                },
-                            })
-                            .then((resultMessenger) => {
-                                setMessenger(resultMessenger.data);
-                            });
+
+                            // axios
+                            //     .get('http://localhost:4000/api/home', {
+                            //         params: {
+                            //             token: cookies.get('token'),
+                            //         },
+                            //     })
+                            //     .then((resultMessenger) => {
+
+                            //     });
                         });
                 }
             });
@@ -111,26 +131,37 @@ function HomeRight({ sendHandleRight }) {
                         .get('http://localhost:4000/api/messages', {
                             params: {
                                 token: cookies.get('token'),
-                                roomChatId: sendHandleRight.messageContent.roomChatId,
+                                roomChatId: roomChatId,
                             },
                         })
                         .then((res) => {
                             setMessageContent(res.data);
-                        })
+                        });
                 }
             });
-
-            
         }, [socket]);
 
         useEffect(() => {
             messContentMain.current.scrollTo(0, 100000000);
         }, [messageContent]);
 
+        useEffect(() => {
+            if (infor && checkInfor) {
+                setCheckInfor(false);
+
+                socket.emit('joinRoomChat', {
+                    roomId: roomChatId,
+                    messageInfoId: infor.messageInfo.messageInfoId,
+                    user: me.id,
+                    saw: infor.messageInfo.saw,
+                });
+            }
+        }, [infor]);
+
         return (
             <div className={cx('messContent')}>
                 <div ref={messContentMain} className={cx('messContentMain')}>
-                    {messageContent.message.map((messRender, index, messArray) => {
+                    { messageContent.message && messageContent.message.map((messRender, index, messArray) => {
                         return (
                             <Message
                                 key={messRender.messageInfoId}
@@ -176,11 +207,50 @@ function HomeRight({ sendHandleRight }) {
     };
 
     useEffect(() => {
-        console.log(12345);
         socket.on('reloadMessenger', (data) => {
             console.log(data);
         });
-    },[socket])
+    }, [socket]);
+
+    useEffect(() => {
+        async function getMessage() {
+            
+            // await axios
+            //     .get('http://localhost:4000/api/home', {
+            //         params: {
+            //             token: cookies.get('token'),
+            //             roomChatId: roomChatId,
+            //         },
+            //     })
+            //     .then((res) => {
+            //         console.log(res.data);
+            //         setInfor(res.data);
+            //     });
+            
+            await axios
+                .get('http://localhost:4000/api/messages', {
+                    params: {
+                        token: cookies.get('token'),
+                        roomChatId: roomChatId,
+                    },
+                })
+                .then((res) => {
+                    console.log(res.data);
+                    setMessageContent(res.data);
+                });
+        }
+
+        getMessage();
+
+        if (infor) {
+            socket.emit('joinRoomChat', {
+                roomId: roomChatId,
+                messageInfoId: infor.messageInfo.messageInfoId,
+                user: me.id,
+                saw: infor.messageInfo.saw,
+            });
+        }
+    }, [roomChatId]);
 
     return (
         <div className={cx('homeRight')}>

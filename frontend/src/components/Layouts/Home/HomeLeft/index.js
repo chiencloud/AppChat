@@ -1,3 +1,4 @@
+import { useState, useEffect, useLayoutEffect } from 'react';
 import classNames from 'classnames/bind';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
@@ -7,30 +8,25 @@ import styles from './HomeLeft.module.scss';
 
 const cx = classNames.bind(styles);
 
-function HomeLeft({ sendHandleLeft }) {
-    const { 
-        setSelectionType, 
-        selectionType, 
-        setMessenger, 
-        messenger, 
-        setMesChoose, 
-        messChoose, 
-        setMessageContent
-    } = sendHandleLeft;
-    
-    const cookies = new Cookies()
+function HomeLeft() {
+    const [selectionType, setSelectionType] = useState('all');
+    const [messenger, setMessenger] = useState([]);
+    const [load, setLoad] = useState(false)
+
+    const cookies = new Cookies();
 
     const handleMessAll = () => {
         setSelectionType('all');
 
-        axios.get('http://localhost:4000/api/home',{ 
-            params: { 
-                token: cookies.get('token')
-            }
-        })
-        .then( resultMessenger => {
-            setMessenger(resultMessenger.data)
-        })
+        axios
+            .get('http://localhost:4000/api/home', {
+                params: {
+                    token: cookies.get('token'),
+                },
+            })
+            .then((resultMessenger) => {
+                setMessenger(resultMessenger.data);
+            });
     };
 
     const handleMessNoSeen = () => {
@@ -59,7 +55,7 @@ function HomeLeft({ sendHandleLeft }) {
                     hidden: '',
                     forward: '',
                     reply: '',
-                    delete: ''
+                    delete: '',
                 },
             },
             {
@@ -85,7 +81,7 @@ function HomeLeft({ sendHandleLeft }) {
                     hidden: '',
                     forward: '',
                     reply: '',
-                    delete: ''
+                    delete: '',
                 },
             },
         ]);
@@ -96,6 +92,26 @@ function HomeLeft({ sendHandleLeft }) {
         setMessenger([]);
     };
 
+    useLayoutEffect(() => {
+        async function getMessenger(){
+            await axios
+                .get('http://localhost:4000/api/home', {
+                    params: {
+                        token: cookies.get('token'),
+                    },
+                })
+                .then((resultMessenger) => {
+                    setMessenger(resultMessenger.data);
+                });
+            setLoad(true)
+        }
+
+        getMessenger()
+    },[selectionType]);
+
+    useEffect(() => {
+        
+    },[])
     return (
         <div className={cx('homeLeft')}>
             <div className={cx('selection')}>
@@ -110,8 +126,7 @@ function HomeLeft({ sendHandleLeft }) {
                 </div>
             </div>
             <div className={cx('messenger')}>
-
-                {messenger.length === 0 && (
+                {messenger.length === 0 && load &&(
                     <div className={cx('searchFriend')}>
                         <p>Bắt đầu tìm kiếm để trò chuyện cùng bạn bè</p>
                     </div>
@@ -121,11 +136,6 @@ function HomeLeft({ sendHandleLeft }) {
                         <Messenger
                             key={index}
                             infor={mess}
-                            handleOnclick={{
-                                messChoose,
-                                setMesChoose,
-                                setMessageContent,
-                            }}
                         />
                     );
                 })}

@@ -7,16 +7,16 @@ const app = express();
 const server = require('http').createServer(app);
 const { Server } = require('socket.io');
 
-const io = new Server(server, {
+app.use(cors());
+const io = new Server(server,{
     cors: {
-        origin: 'http://localhost:3000',
-        method: ['GET', 'POST', 'PUT', 'DELETE'],
-    },
+        origin: "*",
+        method: ["GET", "POST"]
+    }
 });
 
 const port = 4000;
 
-app.use(cors());
 app.use(express.json());
 app.use(
     session({
@@ -28,9 +28,8 @@ app.use(
 );
 
 io.on('connection', (socket) => {
-    console.log(socket.rooms);
     socket.on('joinRoomChat', (roomChat) => {
-        console.log('joined Room', roomChat.roomId);
+        console.log('joined Room', roomChat);
         socket.join(roomChat.roomId);
         // Handle when user click messenger to show message content
         // Update saw
@@ -76,7 +75,7 @@ io.on('connection', (socket) => {
                     console.log(err);
                 } else {
                     resolve(true)
-                }
+                } 
             });
         }).then( () => {
             commandQuery = `
@@ -89,9 +88,9 @@ io.on('connection', (socket) => {
                 if (err) {
                     console.log(err);
                 } else {
-                    socket.in(data.roomChatId).emit('reviceMess', true);
+                    socket.to(data.roomChatId).emit('reviceMess', true);
                     return true;
-                }
+                } 
             });
 
         }).then((updateSuccess) => {
@@ -125,7 +124,6 @@ app.get('/api/home', (req, res) => {
             });
         } else {
             const userId = tokenValue.userId;
-
             let commanQuery = `
                 SELECT * FROM roomchat inner join topic on roomchat.TopicId = topic.TopicId
                                     inner join message on roomchat.RoomChatId = message.RoomChatId
@@ -163,7 +161,6 @@ app.get('/api/home', (req, res) => {
                             if(result1[0].Saw){
                                 saw = result1[0].Saw.split(' ').some((s) => s == userId);
                             }
-                            console.log('saw:::',saw);
 
                             if (result1.length > 0) {
                                 b = {
@@ -200,6 +197,13 @@ app.get('/api/home', (req, res) => {
                                     },
                                 };
                             }
+
+                            if(req.query.roomChatId && req.query.roomChatId == element.RoomChatId){
+                                res.json(b)
+                                res.end();
+                                return;
+                            }
+
                             resolve(b);
                         }
                     });
@@ -226,7 +230,7 @@ app.get('/api/messages', function (req, res) {
             let roomChat = await new Promise((resolve, reject) => {
                 query(commandQuery, (err, dataRomChat) => {
                     if (err) {
-                        res.json(1);
+                        res.json('loi 1');
                         res.end();
                     } else {
                         resolve(dataRomChat);
@@ -247,7 +251,7 @@ app.get('/api/messages', function (req, res) {
             let messageContent = await new Promise((resolve, reject) => {
                 query(commandQuery2, (err, dataRomChat) => {
                     if (err) {
-                        res.json(1);
+                        res.json('loi 2');
                         res.end();
                     } else {
                         resolve(dataRomChat);
@@ -268,7 +272,7 @@ app.get('/api/messages', function (req, res) {
                 return new Promise((resolve, reject) => {
                     query(commandQuery3, (err, replyInfo) => {
                         if (err) {
-                            res.json(1);
+                            res.json('loi 3');
                             res.end();
                         } else {
                             resolve(replyInfo);
@@ -287,6 +291,9 @@ app.get('/api/messages', function (req, res) {
                         a += ' OR ';
                     }
                 }
+                console.log({
+                    a: a
+                });
                 let commandQuery4 = `
                     SELECT UserId, Avatar
                     FROM user
@@ -295,7 +302,7 @@ app.get('/api/messages', function (req, res) {
                 return new Promise((resolve, reject) => {
                     query(commandQuery4, (err, userSaw) => {
                         if (err) {
-                            res.json(1);
+                            res.json('loi 4');
                             res.end();
                         } else {
                             resolve(userSaw);
@@ -342,12 +349,12 @@ app.get('/api/messages', function (req, res) {
                         reply: replyMess,
                         saw: sawMess,
                     });
-                });
+                }); 
             }
 
             const result = {
                 roomChatId: roomChat[0].RoomChatId,
-                roomChatName: roomChat[0].RoomChatName,
+                roomChatName: roomChat[0].RoomChatName, 
                 imageBackground: roomChat[0].ImageBackground,
                 emoji: roomChat[0].Emoji,
                 topicId: roomChat[0].TopicId,
