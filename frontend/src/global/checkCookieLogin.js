@@ -6,22 +6,20 @@ async function checkCookieLogin() {
     if (cookies.get('token')) {
         return await axios({
             method: 'POST',
-            url: 'http://localhost:4000/api/checklogin',
+            url: 'http://localhost:4000/api/login/checklogin',
             data: {
                 token: cookies.get('token'),
             },
         })
             .then((res) => {
-                return res
+                return res;
             })
             .catch((err) => {
                 console.log(err);
-                return false
+                return false;
             });
     }
-    return await false
+    return await false;
 }
-
-
 
 export default checkCookieLogin;

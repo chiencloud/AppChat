@@ -1,0 +1,14 @@
+.load{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    svg{
+        animation: spin 1.8s linear infinite;
+        color: var(--primary-color);
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

@@ -15,7 +15,8 @@ import { PopperWrapper } from '~/components/Popper';
 
 const cx = classNames.bind(styles);
 
-function Message({ messRender, index, messArray, me }) {
+function Message({ messRender, index, messArray, me, handleMess }) {
+    const { setReplyMess, setReplyMessContent } = handleMess;
     const [interactiveSeeMore, setInteractiveSeeMore] = useState(false);
     const seeMore = useRef();
     const messAction = useRef();
@@ -127,8 +128,24 @@ function Message({ messRender, index, messArray, me }) {
                                 </Tippy>
                             </div>
                             <div>
-                                <Tippy placement="top" content={<span className={cx('tooltip1')}>Trả lời</span>}>
-                                    <div className={cx('messInteractive')}>
+                                <Tippy
+                                    placement="top"
+                                    appendTo={document.body}
+                                    interactive
+                                    content={<span className={cx('tooltip1')}>Trả lời</span>}
+                                >
+                                    <div
+                                        className={cx('messInteractive')}
+                                        onClick={() => {
+                                            setReplyMess(true);
+                                            setReplyMessContent({
+                                                messId: messRender.messageInfoId,
+                                                userSendId: messRender.userSend.userId,
+                                                userName: messRender.userSend.nickName || messRender.userSend.fullName,
+                                                messageContent: messRender.messageContent,
+                                            });
+                                        }}
+                                    >
                                         <FontAwesomeIcon icon={faReply} />
                                     </div>
                                 </Tippy>
@@ -249,10 +266,10 @@ function Message({ messRender, index, messArray, me }) {
         <div key={messRender.messageInfoId}>
             <div className={cx('messOfMe')}>
                 <div className={cx('messOfFriendAvatar')}>
-                    {showSeen.length === 1 && index === messArray.length - 1 && <FontAwesomeIcon icon={faCircleCheck} />}
-                    {showSeen.length === 2 && index === messArray.length - 1 && (
-                        <img src={avatarSeen[0]} alt="" />
+                    {showSeen.length === 1 && index === messArray.length - 1 && (
+                        <FontAwesomeIcon icon={faCircleCheck} />
                     )}
+                    {showSeen.length === 2 && index === messArray.length - 1 && <img src={avatarSeen[0]} alt="" />}
                 </div>
                 <div className={cx('messContentOfMe')}>
                     {showNickName && <p>{messRender.userSend.nickName || messRender.userSend.fullName}</p>}
@@ -313,8 +330,24 @@ function Message({ messRender, index, messArray, me }) {
                                 </Tippy>
                             </div>
                             <div>
-                                <Tippy placement="top" content={<span className={cx('tooltip1')}>Trả lời</span>}>
-                                    <div className={cx('messInteractive')}>
+                                <Tippy
+                                    placement="top"
+                                    appendTo={document.body}
+                                    interactive
+                                    content={<span className={cx('tooltip1')}>Trả lời</span>}
+                                >
+                                    <div
+                                        className={cx('messInteractive')}
+                                        onClick={() => {
+                                            setReplyMess(true);
+                                            setReplyMessContent({
+                                                messId: messRender.messageInfoId,
+                                                userSendId: messRender.userSend.userId,
+                                                userName: messRender.userSend.nickName || messRender.userSend.fullName,
+                                                messageContent: messRender.messageContent,
+                                            });
+                                        }}
+                                    >
                                         <FontAwesomeIcon icon={faReply} />
                                     </div>
                                 </Tippy>

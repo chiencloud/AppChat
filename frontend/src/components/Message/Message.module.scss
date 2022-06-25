@@ -192,14 +192,16 @@
         border-radius: 500px;
         font-size: 1rem;
         font-weight: 600;
-        background-color: #e4e6eb;
+        background-color: #f6f6f6;
         color: var(--color-black);
     }
 }
 
 
 .tooltip1{
-    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.923);
+    font-size: 1.2rem;
+    font-weight: 500;
 }
 
 .seeMore{

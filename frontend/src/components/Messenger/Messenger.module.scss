@@ -11,7 +11,7 @@
     padding: 8px 18px !important;
     color: rgb(80, 80, 80);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -103,14 +103,14 @@
 }
 
 .messChose {
-    background-color: #e7effc !important;
+    background-color: rgba(45, 136, 255, 0.1) !important;
 
     .showBellSlashSaw{
-        background-color: #e7effc !important;
+        background-color: rgba(45, 136, 255, 0.1) !important;
     }
 
     .showBellSlash{
-        background-color: #e7effc !important;
+        background-color: rgba(45, 136, 255, 0.1) !important;
     }
 }
 

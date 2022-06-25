@@ -21,7 +21,7 @@ function Register() {
 
     if (userName) {
         axios
-            .get('http://localhost:4000/api/checkusername', {
+            .get('http://localhost:4000/api/register/checkusername', {
                 params: {
                     username: userName,
                 },
@@ -47,8 +47,13 @@ function Register() {
                     if (res.data) {
                         setRegisterSuccess(true);
                     }
+                    else{
+                        alert('Lỗi')
+                    }
                 })
-                .catch(alert('Lỗi'));
+                .catch(err => {
+                    console.log(err);
+                });
         } else {
             alert('Vui lòng nhập đầy đủ thông tin ');
         }

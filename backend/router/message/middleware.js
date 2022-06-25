@@ -1,5 +1,9 @@
+const jwt = require('jsonwebtoken');
+const query = require('../../config');
+
+
 function getMessage(req, res, next) {
-    jwt.verify(req.query.token, 'appchat', async (err, token) => {s
+    jwt.verify(req.query.token, 'appchat', async (err, token) => {
         if (err) {
             res.json({
                 message: false,
@@ -74,9 +78,6 @@ function getMessage(req, res, next) {
                         a += ' OR ';
                     }
                 }
-                console.log({
-                    a: a,
-                });
                 let commandQuery4 = `
                     SELECT UserId, Avatar
                     FROM user
@@ -151,4 +152,11 @@ function getMessage(req, res, next) {
             res.json(result);
         }
     });
+}
+
+
+
+
+module.exports = {
+    getMessage: getMessage
 }

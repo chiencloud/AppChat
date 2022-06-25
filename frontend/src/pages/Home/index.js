@@ -25,7 +25,6 @@ function Home() {
 
     return (
         <div className={cx('home')}>
-            <HomeLeft/>
             <HomeRightDefault />
         </div>
     );

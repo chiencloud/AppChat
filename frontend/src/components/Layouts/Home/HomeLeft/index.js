@@ -1,17 +1,21 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useContext } from 'react';
 import classNames from 'classnames/bind';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 
 import Messenger from '~/components/Messenger';
 import styles from './HomeLeft.module.scss';
+import { SocketContext } from '~/components/Layouts/DefaultLayouts';
+import Load from '~/components/Load';
 
 const cx = classNames.bind(styles);
 
 function HomeLeft() {
     const [selectionType, setSelectionType] = useState('all');
     const [messenger, setMessenger] = useState([]);
-    const [load, setLoad] = useState(false)
+    const [load, setLoad] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const socket = useContext(SocketContext);
 
     const cookies = new Cookies();
 
@@ -93,7 +97,7 @@ function HomeLeft() {
     };
 
     useLayoutEffect(() => {
-        async function getMessenger(){
+        async function getMessenger() {
             await axios
                 .get('http://localhost:4000/api/home', {
                     params: {
@@ -103,15 +107,45 @@ function HomeLeft() {
                 .then((resultMessenger) => {
                     setMessenger(resultMessenger.data);
                 });
-            setLoad(true)
+            setLoad(true);
+            setLoading(false)
         }
 
-        getMessenger()
-    },[selectionType]);
+        getMessenger();
+    }, [selectionType]);
 
     useEffect(() => {
-        
-    },[])
+        function getMessenger() {
+            axios
+                .get('http://localhost:4000/api/home', {
+                    params: {
+                        token: cookies.get('token'),
+                    },
+                })
+                .then((resultMessenger) => {
+                    setMessenger(resultMessenger.data);
+                });
+            setLoading(false)
+        }
+
+        socket.on('reviceMessUserSend', async (reviceMess) => {
+            if (socket.id == reviceMess.socketId) {
+                getMessenger();
+            }
+        });
+
+        socket.on('seenMessageMessenger', async (reviceMess) => {
+            if (socket.id == reviceMess.socketId) {
+                getMessenger();
+            }
+        });
+
+        socket.on('reviceMess', (reviceMess) => {
+            if (reviceMess) {
+                getMessenger();
+            }
+        });
+    }, [socket]);
     return (
         <div className={cx('homeLeft')}>
             <div className={cx('selection')}>
@@ -125,21 +159,20 @@ function HomeLeft() {
                     Đang chờ
                 </div>
             </div>
-            <div className={cx('messenger')}>
-                {messenger.length === 0 && load &&(
-                    <div className={cx('searchFriend')}>
-                        <p>Bắt đầu tìm kiếm để trò chuyện cùng bạn bè</p>
-                    </div>
-                )}
-                {messenger.map((mess, index) => {
-                    return (
-                        <Messenger
-                            key={index}
-                            infor={mess}
-                        />
-                    );
-                })}
-            </div>
+            {loading ? (
+                <Load size={1.9} top={20}/>
+            ) : (
+                <div className={cx('messenger')}>
+                    {messenger.length === 0 && load && (
+                        <div className={cx('searchFriend')}>
+                            <p>Bắt đầu tìm kiếm để trò chuyện cùng bạn bè</p>
+                        </div>
+                    )}
+                    {messenger.map((mess, index) => {
+                        return <Messenger key={index} infor={mess} />;
+                    })}
+                </div>
+            )}
         </div>
     );
 }

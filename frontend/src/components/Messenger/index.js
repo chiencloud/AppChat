@@ -25,9 +25,9 @@ const cx = classNames.bind(styles);
 function Messenger({ infor }) {
     const [custom, setCustom] = useState(false);
     const [countTimeSend, setCountTimeSend] = useState(countTime(infor.messageInfo.createAt));
-    const {roomChatId} = useParams()
+    const { roomChatId } = useParams();
 
-    const checkSawMessage = infor.messageInfo.saw
+    const checkSawMessage = infor.messageInfo.saw;
     const tippy = useRef();
 
     const UserProfile = () => {
@@ -75,19 +75,16 @@ function Messenger({ infor }) {
             }
         }
     }, [custom]);
-
     useEffect(() => {
-        const handleCountTime = () => {
+        const handleCountTime = setInterval(() => {
             setCountTimeSend(countTime(infor.messageInfo.createAt));
-        };
-
-        setInterval(handleCountTime, 1000 * 60);
+        }, 1000);
 
         return () => {
             clearInterval(handleCountTime);
         };
-    }, []);
-    
+    });
+
     return (
         <div className={cx('messMain')}>
             <div
@@ -112,10 +109,10 @@ function Messenger({ infor }) {
                             </p>
                         </div>
                     </div>
-    
+
                     <div className={cx('alert')}></div>
                     <div className={cx('showBellSlash', !checkSawMessage && 'showBellSlashSaw')}>
-                        {infor.notification !== null && <FontAwesomeIcon icon={faBellSlash} /> }
+                        {infor.notification !== null && <FontAwesomeIcon icon={faBellSlash} />}
                     </div>
                 </Link>
             </div>
