@@ -1,52 +1,42 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faMagnifyingGlass, faUserLarge } from '@fortawesome/free-solid-svg-icons';
 import classNames from 'classnames/bind';
 import Tippy from '@tippyjs/react/headless';
 import 'tippy.js/dist/tippy.css';
+import axios from 'axios';
 
 import AccountItem from '~/components/AccountItem';
 import { PopperWrapper } from '~/components/Popper';
 import styles from './Header.module.scss';
+import Load from '~/components/Load'
 
 const cx = classNames.bind(styles);
 
 function Header() {
     const [searchResult, setSearchResult] = useState([]);
-    const info = [
-        {
-            img: 'https://res.cloudinary.com/dseuvenfm/image/upload/v1649743106/Cloud/ImageProduct/aBT5A8965_gyurga.jpg',
-            userName: 'Nguyễn Duy Chiến',
-            nickName: 'duychien123',
-            type: 'Bạn bè',
-        },
-        {
-            img: 'https://res.cloudinary.com/dseuvenfm/image/upload/v1649743106/Cloud/ImageProduct/aBT5A8965_gyurga.jpg',
-            userName: 'Nguyễn Duy Chiến',
-            nickName: 'duychien123',
-            type: 'Bạn bè',
-        },
-        {
-            img: 'https://res.cloudinary.com/dseuvenfm/image/upload/v1649743106/Cloud/ImageProduct/aBT5A8965_gyurga.jpg',
-            userName: 'Nguyễn Duy Chiến',
-            nickName: 'duychien123',
-            type: 'Người lạ',
-        },
-    ];
-
-    useEffect(() => {
-        // setInterval(() => {
-        //     setSearchResult([]);
-        // }, 0);
-    }, []);
+    const [loading, setLoading] = useState(true)
+    const [isSearchResult, setIsSearchResult] = useState(false);
 
     const handleSearch = (e) => {
-        if(e.length > 0){
-            setSearchResult([1])
+        
+        if(e.trim().length > 0){
+            setIsSearchResult(true)
+            setLoading(true)
+
+            axios.get('http://localhost:4000/api/search', {
+                params: {
+                    searchValue: e,
+                    type: 'short'
+                }
+            })
+            .then(response =>{
+                setSearchResult(response.data)
+                setLoading(false)                
+            })
         }
         else{
-            setSearchResult([])
+            setIsSearchResult(false)
         }
     }
 
@@ -83,15 +73,19 @@ function Header() {
 
             <Tippy
                 interactive
-                visible={searchResult.length > 0}
+                visible={isSearchResult}
+                onClickOutside={() => setIsSearchResult(false)}
                 appendTo={document.body}
                 render={(attrs) => (
                     <div className={cx('searchResult')} tabIndex="-1" {...attrs}>
                         <PopperWrapper>
                             <h4>Kết quả tìm kiếm</h4>
-                            {info.map((infor, index) => {
+                            {loading && (<Load/>)}
+                            {searchResult.length > 0 ? searchResult.map((infor, index) => {
                                 return <AccountItem key={index} infor={infor} />;
-                            })}
+                            }) : (<div className={cx('searchNoResult')}>
+                                Người dùng mà bạn cần tìm kiếm không tồn tại
+                            </div>)}
                         </PopperWrapper>
                     </div>
                 )}

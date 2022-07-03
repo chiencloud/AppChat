@@ -307,6 +307,9 @@ function Message({ messRender, index, messArray, me, handleMess }) {
                                                     <PopperWrapper>
                                                         <div className={cx('seeMore')}>
                                                             <div>
+                                                                <p>Thu hồi</p>
+                                                            </div>
+                                                            <div>
                                                                 <p>Xóa, gỡ bỏ</p>
                                                             </div>
                                                             <div>

@@ -56,10 +56,10 @@
         }
         
         .slideSeenMessage{
-            width: 100%;
+            width: 35px;
+            height: 35px;
             position: absolute;
-            left: 0;
-            right: 0;
+            left: calc(50% - 35px);;
             z-index: 500;
             display: none;
             
@@ -78,6 +78,10 @@
                 svg{
                     color: var(--primary-color);
                     font-size: 1.6rem
+                }
+
+                &:hover{
+                    background-color: rgb(246, 246, 246);
                 }
             }
         }

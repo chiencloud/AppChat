@@ -1,7 +1,7 @@
 const express = require('express');
 const routerSearch = express.Router();
-const { getCheckUserName } = require('./middleware')
+const { getSearchUser } = require('./middleware');
 
-routerSearch.get('/', getCheckUserName)
+routerSearch.get('/', getSearchUser);
 
-module.exports = routerSearch
+module.exports = routerSearch;

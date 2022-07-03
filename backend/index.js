@@ -8,6 +8,7 @@ const routerMessage = require('./router/message');
 const routerHome = require('./router/home');
 const routerLogin = require('./router/login');
 const routerRegister = require('./router/register');
+const routerSearch = require('./router/search');
 
 
 const query = require('./config');
@@ -27,7 +28,7 @@ app.use('/api/home', routerHome);
 app.use('/api/messages', routerMessage);
 app.use('/api/login', routerLogin);
 app.use('/api/register', routerRegister);
-app.use('/api/search', routerRegister);
+app.use('/api/search', routerSearch);
 
 server.listen(port, (req, res) => {
     console.log(`listenning on port ${port}`);

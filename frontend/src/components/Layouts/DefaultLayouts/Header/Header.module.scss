@@ -66,12 +66,19 @@
 }
 
 .searchResult{
-    padding: 0 18px;
+    // padding: 0 18px;
+    width: 508px;
 
     h4{
         font-weight: 600;
         margin-bottom: 15px;
         padding: 0 16px;
+    }
+
+    .searchNoResult{
+        font-size: 1.4rem;
+        color: rgb(255, 39, 39);
+        padding: 0 16px 10px 16px;
     }
 
 }

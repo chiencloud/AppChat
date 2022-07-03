@@ -333,7 +333,6 @@ function HomeRight() {
     };
 
     useEffect(() => {
-        console.log(123484593475);
         setLoading(true)
         async function getMessage() {
 
